@@ -1,0 +1,71 @@
+---
+title: "Exercise 1"
+format: html
+execute: 
+  echo: true
+editor: visual
+---
+
+## First exercise
+
+3\)
+
+a\) iii. is correct because even though in the baseline case females earn more, the interaction effect is negative, and if the GPA is sufficiently high (at least 3.5), men earn more.
+
+b\)
+
+```{r}
+beta_0 <- 50
+beta_1 <- 20
+beta_2 <- 0.07
+beta_3 <- 35
+beta_4 <- 0.01
+beta_5 <- -10
+IQ <- 110
+GPA <- 4
+GEN <- 1
+
+beta_0 + GPA * beta_1 + IQ * beta_2 + GEN * beta_3 + GPA * IQ * beta_4 + GPA * GEN * beta_5
+```
+
+c\) FALSE
+
+In the interaction effect we multiply IQ with GPA. The resulting number is thus big, so a small coefficient is okay. Whether it is statistically significant depends on the standard deviation of the variable and the sample size. (t test)
+
+6\) In the simple regression case we have
+
+$$
+\hat{y_i} = \hat{\beta _0} + \hat{\beta _1} x_i
+$$
+
+If we plug in $x_i = \bar{x}$ and use 3.4, we get:
+
+$$
+\hat{y_i} = \bar{y} - \hat{\beta _1} \bar{x} + \hat{\beta _1} \bar{x} = \bar{y}
+$$
+
+Thus the statement is proven.
+
+11\)
+
+a\)
+
+```{r}
+set.seed(1)
+x = rnorm(100)
+y = 2*x+rnorm(100)
+
+reg_a <- lm(y~x+0)
+summary(reg_a)
+```
+
+The coefficient is 1.9939, and it is significant, because the p value is very small.
+
+b\)
+
+```{r}
+reg_b <- lm(x~y+0)
+summary(reg_b)
+```
+
+The coefficient is 0.39, and it is significant, with t t and p value being the same as in the last case.
