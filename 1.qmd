@@ -1,0 +1,210 @@
+---
+title: "Class 1"
+format: pdf
+execute: 
+  echo: true
+editor: visual
+---
+
+## Chapter 3
+
+3\)
+
+a\) iii. is correct because even though in the baseline case females earn more, the interaction effect is negative, and if the GPA is sufficiently high (at least 3.5), men earn more.
+
+b\)
+
+```{r}
+beta_0 <- 50
+beta_1 <- 20
+beta_2 <- 0.07
+beta_3 <- 35
+beta_4 <- 0.01
+beta_5 <- -10
+IQ <- 110
+GPA <- 4
+GEN <- 1
+
+beta_0 + GPA * beta_1 + IQ * beta_2 + GEN * beta_3 + GPA * IQ * beta_4 + GPA * GEN * beta_5
+```
+
+c\) FALSE
+
+In the interaction effect we multiply IQ with GPA. The resulting number is thus big, so a small coefficient is okay. Whether it is statistically significant depends on the standard deviation of the variable and the sample size. (t test)
+
+6\) In the simple regression case we have
+
+$$
+\hat{y_i} = \hat{\beta _0} + \hat{\beta _1} x_i
+$$
+
+If we plug in $x_i = \bar{x}$ and use 3.4, we get:
+
+$$
+\hat{y_i} = \bar{y} - \hat{\beta _1} \bar{x} + \hat{\beta _1} \bar{x} = \bar{y}
+$$
+
+Thus the statement is proven.
+
+11\)
+
+a\)
+
+```{r}
+set.seed(1)
+x = rnorm(100)
+y = 2*x+rnorm(100)
+
+reg_a <- lm(y~x+0)
+summary(reg_a)
+```
+
+The coefficient is 1.9939, and it is significant, because the p value is very small.
+
+b\)
+
+```{r}
+reg_b <- lm(x~y+0)
+summary(reg_b)
+```
+
+The coefficient is 0.39, and it is significant, with t t and p value being the same as in the last case.
+
+c\) t the test and the p value are the same
+
+d\) ?
+
+e\) ?
+
+f\)
+
+```{r}
+reg_f_1 <- lm(x~y) 
+reg_f_2 <- lm(y~x)
+summary(reg_f_1)
+summary(reg_f_2)
+
+```
+
+15\)
+
+a\)
+
+```{r}
+library(ISLR2)
+df <- Boston
+regs <- list() #create a list
+for (i in colnames(df[-1])){ #loop over all the variables
+  tmp_y <- df[["crim"]]
+  tmp_x <- df[[i]]
+  tmp <- lm(tmp_y ~ tmp_x)
+  regs[[i]] <- tmp
+}
+reg_sig <- list()
+sig_num <- c()
+for (r in names(regs)) { #find significant results
+  if (summary(regs[[r]])$coefficients[2,4] <= 0.05){
+    tmp <- regs[[r]]
+    reg_sig[[r]] <- tmp
+  }
+}
+names(reg_sig)
+```
+
+11 variables are significant with a p value less than 0.05. The exception is chas.
+
+```{r}
+for (r in names(regs)) { #plot the results
+  plot(df[[r]],df$crim, ylab = "Criminality", xlab = r)
+  abline(regs[[r]])
+}
+```
+
+b\)
+
+```{r}
+reg_multi <- lm(crim ~ ., df)
+summary(reg_multi)
+```
+
+Here in much less variables is the result significant. Only for the following (with a alpha of 0.05):
+
+indus, dis, rad, medv
+
+c\)
+
+```{r}
+x_axis <-c()
+y_axis <- c()
+for (r in names(regs)) {
+  x_axis[r] <- summary(regs[[r]])$coefficients[2,1]
+}
+y_axis <- summary(reg_multi)$coefficients[-1,1]
+plot(x_axis, y_axis)
+```
+
+d\)
+
+```{r}
+regs_nonlinear <- list()
+for (i in colnames(df[-1])){
+  tmp_y <- df[["crim"]]
+  tmp_x <- df[[i]]
+  tmp_x_2 <- tmp_x * tmp_x
+  tmp_x_3 <- tmp_x * tmp_x * tmp_x
+  tmp <- lm(tmp_y ~ tmp_x + tmp_x_2 + tmp_x_3)
+  regs_nonlinear[[i]] <- tmp
+}
+```
+
+## Chapter 4
+
+1\)
+
+Starting from 4.2:
+
+$$
+p(X) + p(X) e^{\beta_0+\beta_1X} = e^{\beta_0+\beta_1X}
+$$
+
+$$
+\frac{p(X)}{1-p(X)} + \frac{p(X) e^{\beta_0+\beta_1X}}{1-p(X)} =  \frac{e^{\beta_0+\beta_1X}}{1-p(x)}
+$$
+
+$$
+\frac{p(X)}{1-p(X)}  =  \frac{e^{\beta_0+\beta_1X}}{1-p(x)} - \frac{p(X) e^{\beta_0+\beta_1X}}{1-p(X)}
+$$
+
+$$
+\frac{p(X)}{1-p(X)}  =  \frac{e^{\beta_0+\beta_1X} - p(X) e^{\beta_0+\beta_1X}}{1-p(X)}
+$$
+
+$$
+\frac{p(X)}{1-p(X)}  =  \frac{e^{\beta_0+\beta_1X} (1-p(X))}{1-p(X)}
+$$
+
+$$
+\frac{p(X)}{1-p(X)}  =  e^{\beta_0+\beta_1X}
+$$
+
+2\) ?
+
+4\)
+
+a\) 10%
+
+b)1%
+
+c\) $10^{100}$%
+
+d\) As we can see, the higher the dimensionality goes, the less probable it is that we already have an observation which is similar in each dimension. Because of this, our averages will be based on a low sample size, making our prediction weak.
+
+e\)
+
+p=1: the "side" is 1/10 length
+
+p=2: 0,316227766 ($\sqrt{0.1}$ )
+
+p=100: 0.97237221 ($\sqrt[100]{0.1}$)
+
+16\) ?
