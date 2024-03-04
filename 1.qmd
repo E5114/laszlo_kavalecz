@@ -1,6 +1,6 @@
 ---
 title: "Class 1"
-format: html
+format: pdf
 execute: 
   echo: true
 editor: visual
