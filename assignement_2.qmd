@@ -1,0 +1,192 @@
+---
+title: "2_assignement"
+format: pdf
+editor: visual
+---
+
+## Chapter 5
+
+### Exercise 1 ???
+
+### Exercise 2
+
+a\) 1-1/n
+
+The probability that it is the jth is 1/n, the probability that it is not is 1-1/n
+
+b\) Same as before 1-1/n
+
+The bootstrap always takes a random observation from the original sample, no matter what came before
+
+c\) For it not to be in the bootstrap sample, it mustn't be picked at any step. Thus it will be (1-1/n)*(1-1/n).......*\*(1-1/n) n times.
+
+d\) 0.67232
+
+e\) 0.6339
+
+f\) 0.6321389
+
+g\)
+
+```{r}
+x <- seq(1, 100000, 1)
+y <- 1-(1-(1/x))^x
+plot(x, y)
+```
+
+The value approaches approx 0.6321
+
+h\)
+
+```{r}
+store <- rep(NA, 10000)
+for(i in 1:10000){
+store[i] <- sum(sample(1:100, rep=TRUE) == 4) > 0
+}
+mean(store)
+```
+
+As expected it is around the value we calculated.
+
+### Exercise 3
+
+a\) We split the training set into k subsamples. We create a model based on every sample, except the ones in the k-th group. After this we run the model on the k-th set, and measure the MSE. We repeat this with each of the groups.
+
+b\)
+
+### Exercise 7
+
+```{r}
+library(ISLR2)
+dat <- Weekly
+#a
+fit1 <- glm(Direction ~ Lag1 + Lag2, data = dat, family = binomial)
+#b
+fit2 <- glm(Direction ~ Lag1 + Lag2, data = dat[-1,], family = binomial)
+#c
+if (predict(fit2, newdata = dat[1, 2:3], type = "response") > 0.5){
+  pred <- "Up"
+  print(pred)
+} else {
+  pred <- "Down"
+  print(pred)
+}
+```
+
+it was not correctly predicted
+
+d\)
+
+```{r}
+preds = c()
+ers = c()
+for (i in 1:nrow(dat)) {
+  mod <- glm(Direction ~ Lag1 + Lag2, data = dat[-i,], family = binomial)
+  if(predict(mod, newdata = dat[i, 2:3], type = "response") > 0.5) {
+    tmp <- "Up"
+  } else {
+    tmp <- "Down"
+  }
+  preds[i] <- tmp
+  if(tmp == dat[i, 9]){
+    ers[i] <- 0
+  } else
+    ers[i] <- 1
+}
+```
+
+e\)
+
+```{r}
+mean(ers)
+```
+
+Slightly lower than 50 %
+
+## Chapter 6
+
+### Exercise 1
+
+a\)
+
+```{r}
+n =  1000
+p = 20
+X = matrix(rnorm(n*p), n, p)
+B = rnorm(20)
+B[c(4,7,13,19)] = 0
+Y= X %*% B
+X <- cbind(X,Y)
+colnames(X) <- c(1:20, "Y")
+
+```
+
+b\)
+
+```{r}
+test <- sample(1:nrow(X), 100)
+X_test <- X[test,]
+X_train <- X[-test,]
+X_train <- as.data.frame(X_train)
+X_test <- as.data.frame(X_test)
+```
+
+c\)
+
+```{r}
+library(leaps)
+regsubset <- regsubsets(Y ~., data = X_train, nvmax = 20)
+regsummary <- summary(regsubset)
+
+plot(1:20, regsummary$rss/900)
+mse_train <- regsummary$rss/900
+```
+
+d\)
+
+```{r}
+library(tidyverse)
+bestpredictors <- regsummary$which
+colnames(bestpredictors) <- c("Intercept", 1:20)
+bestpredictors <- as.data.frame(bestpredictors)
+predictions <- list()
+fits_list <- list()
+regs_list <- list()
+mse_test <- c()
+fits_list <- list()
+ for(i in 1:20) {
+  vars <- bestpredictors[i,-1]
+  regs <- which(vars == TRUE)
+  regs_list[[i]] <- regs
+  tmp_fit <- lm(Y ~ ., data = X_train[,c(regs, 21)])
+  fits_list[[i]] <- tmp_fit
+  predictions[[i]] <- predict(tmp_fit, newdata = X_test)
+  mse_test[i] <- mean((X_test$Y - predictions[[i]])^2)
+}
+plot(mse_test)
+```
+
+e\)
+
+```{r}
+which(mse_test == min(mse_test))
+```
+
+f\)
+
+```{r}
+summary(fits_list[[18]])$coef
+B
+```
+
+They are very similar, the 0 values are close to 0, and are not significant.
+
+g\)
+
+```{r}
+values <- c()
+for(i in 1:20){
+  values[i] <- sqrt(sum((B[regs_list[[i]]] - summary(fits_list[[i]])$coef[-1, 1])^2))
+}
+plot(values)
+```
